@@ -1,0 +1,28 @@
+import logging
+import asyncpg
+import asyncio
+
+logging.basicConfig(
+    level=logging.INFO,  # Xabarlarni qaysi darajaga (INFO, ERROR, DEBUG) yozish kerakligini belgilaydi
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log formatini belgilaydi
+    filename='database_connection.log',  # Fayl nomi
+    filemode='a'  # Log faylini qo'shish uchun 'a' (append) rejimida ochish
+)
+
+async def main():
+    try:
+        logging.info("Dastur boshlanmoqda...")
+        # Ma'lumotlar bazasi ulanishi
+        pool = await asyncpg.create_pool(dsn='postgresql://postgres:root123@localhost/bot_aiogram')
+        logging.info("Ma'lumotlar bazasi ulanishi muvaffaqiyatli!")
+        
+        async with pool.acquire() as conn:
+            await conn.execute('SELECT * FROM your_table')
+            logging.info("So'rov muvaffaqiyatli amalga oshirildi!")
+    except asyncpg.exceptions.TooManyConnectionsError as e:
+        logging.error(f"Ulanishlar soni cheklangan: {e}")
+    except Exception as e:
+        logging.error(f"Noma'lum xatolik: {e}")
+
+if __name__ == '__main__':
+    asyncio.run(main())
